@@ -6,3 +6,4 @@
 - setup.sh has commands in mind for arm m1 (specifically for spacy installation)
 - Using python3.12 not 3.13 becase spacy does not support
 ### [Project Notes Doc](https://docs.google.com/document/d/1WNQqmFWBEeeN1jmg1SmI0bFihNoGLY8COHLpfIMMSVM/edit?usp=sharing)
+- For development
