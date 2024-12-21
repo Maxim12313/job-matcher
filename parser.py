@@ -3,6 +3,32 @@ import spacy
 import re
 from pypdf import PdfReader
 
+SECTION_TITLES = [
+    "education",
+    "experience",
+    "projects",
+    "skills",
+    "coursework",
+    "research",
+    "achievements",
+    "technologies",
+]
+
+
+def getSectionData(text):
+    sectionData = dict()
+    for title in SECTION_TITLES:
+        sectionData[title] = []
+
+    section = ""
+    for line in text.split("\n"):
+        line = line.strip()
+        if line.lower() in sectionData:
+            section = line.lower()
+        elif section in sectionData:
+            sectionData[section].append(line)
+    return sectionData
+
 
 def getPhone(text):
     # https://regex101.com/library/wZ4uU6?orderBy=RELEVANCE&search=phone
@@ -35,3 +61,8 @@ if __name__ == "__main__":
         exit(1)
     path = sys.argv[1]
     text = readPdf(path)
+    sectionData = getSectionData(text)
+    for name, data in sectionData.items():
+        print(name)
+        print(data)
+        print()
