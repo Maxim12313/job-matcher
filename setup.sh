@@ -1,4 +1,5 @@
 #!/bin/zshrc
+python3.12 -m venv env
 source env/bin/activate
 
 # install spacy
