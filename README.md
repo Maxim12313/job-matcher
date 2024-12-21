@@ -1,3 +1,8 @@
+### General
+1. Parse resume and job description
+2. Extract important sections
+4. Compare similarity on each section
+
 ### Sources
 - [Pyreparse](https://github.com/OmkarPathak/pyresparser)
 - [Resume Matcher](https://github.com/srbhr/Resume-Matcher)
