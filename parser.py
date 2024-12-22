@@ -73,11 +73,6 @@ def testBasic():
     text = readPdf(path)
     print("phone:", getPhone(text))
     print("email:", getEmail(text))
-    sectionData = getSectionData(text)
-    for name, data in sectionData.items():
-        print(name)
-        print(data)
-        print()
 
 
 def testNLP():
@@ -85,15 +80,23 @@ def testNLP():
     text = readPdf(path)
     nlp = spacy.load("en_core_web_sm")
     doc = nlp(text)
-    name = getName(nlp, doc)
-    print(name)
     for it in list(doc.ents):
         print(it.label_, it.text)
+
+
+def testSection():
+    path = sys.argv[1]
+    text = readPdf(path)
+    sectionData = getSectionData(text)
+    for name, data in sectionData.items():
+        print(name)
+        print(data)
+        print()
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("usage: parser.py [pdf path]")
         exit(1)
-    testBasic()
     testNLP()
+    # testSection()
