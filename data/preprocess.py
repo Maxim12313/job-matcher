@@ -12,18 +12,23 @@ def replace_newlines(row):
     return row
 
 
-def clean_data():
-    ds = load_dataset("json", data_files="./training-data.json", split="train")
+def get_data_split():
+    ds = load_dataset("json", data_files="./data.json", split="train")
     ds = ds.select_columns(["content", "annotation"])
     ds = ds.filter(keep_row)
     ds = ds.map(replace_newlines)
-    return ds
+    ds = ds.shuffle(seed=2024)
+
+    # train 70, valid 15, test 15
+    ds, validate = ds.train_test_split(test_size=0.15).values()
+    train, test = ds.train_test_split(test_size=0.15 / 0.85).values()
+
+    return train, validate, test
 
 
-def convert_to_spacy():
+def convert_to_spacy(ds, name):
     # data set peculiarities explained here: https://www.kaggle.com/code/taha07/ner-on-resumes-using-spacy
     # format guide https://spacy.io/usage/training#training-data
-    ds = clean_data()
     nlp = spacy.blank("en")
     db = DocBin()
     for it in ds:
@@ -52,8 +57,13 @@ def convert_to_spacy():
                 ents.append(span)
 
         db.add(doc)
-    db.to_disk("./training-data.spacy")
+    path = f"./{name}.spacy"
+    db.to_disk(path)
+    print(f"saved at {path}")
 
 
 if __name__ == "__main__":
-    convert_to_spacy()
+    train, validate, test = get_data_split()
+    convert_to_spacy(train, "train")
+    convert_to_spacy(validate, "validate")
+    convert_to_spacy(test, "test")
