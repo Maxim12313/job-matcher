@@ -1,3 +1,3 @@
 env
 .ipynb_checkpoints
-training-data.json
+training-data*

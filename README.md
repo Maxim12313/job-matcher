@@ -6,6 +6,7 @@
 ### Sources
 - [Pyreparse](https://github.com/OmkarPathak/pyresparser)
 - [Resume Matcher](https://github.com/srbhr/Resume-Matcher)
+- [Dataset]("https://www.kaggle.com/datasets/dataturks/resume-entities-for-ner/data")
 ### Setup
 - Setup environment with setup.sh
 - setup.sh has commands in mind for arm m1 (specifically for spacy installation)
