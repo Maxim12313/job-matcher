@@ -62,10 +62,14 @@ def getName(nlp, doc):
 
 
 def readPdf(path):
-    reader = PdfReader(path)
-    text = reader.pages[0].extract_text()
-    # TODO: do any cleaning
-    return text
+    try:
+        reader = PdfReader(path)
+        # TODO: do any cleaning
+        text = reader.pages[0].extract_text()
+        return text
+    except:
+        print(f"{path} not found")
+        exit(1)
 
 
 def testBasic():

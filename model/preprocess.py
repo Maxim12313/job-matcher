@@ -1,7 +1,6 @@
 import os
 import spacy
 import json
-from spacy.tokens import DocBin
 from datasets import load_dataset
 
 dir = os.path.dirname(os.path.abspath(__file__))
