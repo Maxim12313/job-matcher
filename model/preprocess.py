@@ -1,5 +1,6 @@
 import os
 import spacy
+import json
 from spacy.tokens import DocBin
 from datasets import load_dataset
 
@@ -15,7 +16,7 @@ def replace_newlines(row):
     return row
 
 
-def get_data_split():
+def load_data_split():
     ds = load_dataset("json", data_files=dir + "/data.json", split="train")
     ds = ds.select_columns(["content", "annotation"])
     ds = ds.filter(keep_row)
@@ -29,14 +30,17 @@ def get_data_split():
     return train, validate, test
 
 
+def save_data(path, data):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
 def convert_to_spacy(ds, name):
     # data set peculiarities explained here: https://www.kaggle.com/code/taha07/ner-on-resumes-using-spacy
-    # format guide https://spacy.io/usage/training#training-data
-    nlp = spacy.blank("en")
-    db = DocBin()
+    # [(text, { "entitites:", [(start, end, label)] })]
+    data = []
     for it in ds:
         (content, notes) = it.values()
-        doc = nlp(content)
         ents = []
         for note in notes:
             # sometimes multiple or 1
@@ -56,17 +60,20 @@ def convert_to_spacy(ds, name):
 
             for label in labels:
                 # dataset [start, end] while spacy requires [start, end)
-                span = doc.char_span(start, end + 1, label=label)
-                ents.append(span)
+                ents.append((start, end + 1, label))
+        data.append((content, {"entities": ents}))
 
-        db.add(doc)
-    path = f"{dir}/{name}.spacy"
-    db.to_disk(path)
+    path = f"{dir}/{name}.json"
+    save_data(path, data)
     print(f"saved at {path}")
 
 
-if __name__ == "__main__":
-    train, validate, test = get_data_split()
+def process():
+    train, validate, test = load_data_split()
     convert_to_spacy(train, "train")
     convert_to_spacy(validate, "validate")
     convert_to_spacy(test, "test")
+
+
+if __name__ == "__main__":
+    process()
