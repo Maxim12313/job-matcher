@@ -1,5 +1,7 @@
+.DS_Store
 env
 .ipynb_checkpoints
 *.json
 *.spacy
 __pycache__
+*.csv
