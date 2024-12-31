@@ -24,10 +24,14 @@ def knn_results(file_value):
         text = pdf[0].get_text()
         labels = knn.get_categories()
         pred = knn.predict(text)[0]
+        st.write(f"Your skill is best suited to {pred}")
+
         pred_prob = knn.predict_proba(text)[0]
         probs = [(labels[i], pred_prob[i]) for i in range(len(labels))]
-        st.write(f"Your skill is best suited to {pred}")
-        st.write(probs)
+        table = pd.DataFrame(probs, columns=["Occupation", "Probability"])
+        table.sort_values("Probability", inplace=True, ascending=False)
+        table.reset_index(inplace=True, drop=True)
+        st.table(table)
 
 
 file = st.file_uploader("Upload PDF Resume", type="pdf")
