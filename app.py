@@ -1,22 +1,41 @@
 import pandas as pd
+import pymupdf
 import streamlit as st
+from scripts import ResumeKNN
 from streamlit_pdf_viewer import pdf_viewer
 from scripts.parser import parse_resume
 
 
-file = st.file_uploader("Upload PDF Resume", type="pdf")
-if file:
-    st.write(file.name)
-
-    button = st.download_button("Download PDF", file.getvalue())
-    st.write(button)
-
-    pdf_viewer(file.getvalue())
-    data = parse_resume(file.getvalue())
+def display_parsed(file_value):
+    data = parse_resume(file_value)
     for key in data:
         data[key] = "\n".join(data[key])
+
     df = pd.DataFrame.from_dict(data, orient="index", columns=["value"])
     st.table(df.style.set_properties(**{"white-space": "pre-wrap"}))
+
+
+def knn_results(file_value):
+    knn = ResumeKNN()
+    # TODO: getting text manually twice
+    # improve code when parse is figured out
+    # also must clean for only experience + skill section
+    with pymupdf.open("pdf", file_value) as pdf:
+        text = pdf[0].get_text()
+        labels = knn.get_categories()
+        pred = knn.predict(text)[0]
+        pred_prob = knn.predict_proba(text)[0]
+        probs = [(labels[i], pred_prob[i]) for i in range(len(labels))]
+        st.write(f"Your skill is best suited to {pred}")
+        st.write(probs)
+
+
+file = st.file_uploader("Upload PDF Resume", type="pdf")
+if file:
+    file_value = file.getvalue()
+    pdf_viewer(file_value)
+    display_parsed(file_value)
+    knn_results(file_value)
 
 
 st.write(file)

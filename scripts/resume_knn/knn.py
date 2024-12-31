@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 import re
 import string
 from pandas import DataFrame
@@ -88,47 +89,51 @@ def train_save_knn():
         pickle.dump(vectorizer, file)
 
 
+# TODO: also remove name, email, location, phone number from resume
 class ResumeKNN:
     model: KNeighborsClassifier = None
     encoder: LabelEncoder = None
     vectorizer: TfidfVectorizer = None
 
     def __init__(self):
-        with open("model.pickle", "rb") as file:
+        dir = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(dir, "model.pickle"), "rb") as file:
             self.model = pickle.load(file)
 
-        with open("encoder.pickle", "rb") as file:
+        with open(os.path.join(dir, "encoder.pickle"), "rb") as file:
             self.encoder = pickle.load(file)
 
-        with open("vectorizer.pickle", "rb") as file:
+        with open(os.path.join(dir, "vectorizer.pickle"), "rb") as file:
             self.vectorizer = pickle.load(file)
 
-    def predict(self, data):
-        print()
-        if not isinstance(data, list):
-            data = [data]
+    def get_categories(self):
+        return self.encoder.classes_
 
+    def predict(self, data):
+        if isinstance(data, str):
+            data = [data]
+        if not isinstance(data, list):
+            print(f"predict with {type(data)}")
+            assert False
+
+        data = [clean_resume(x) for x in data]
         features = self.vectorizer.transform(data)
         pred = self.model.predict(features)
         return self.encoder.inverse_transform(pred)
 
-    # def predict_proba(self, data):
-    #     if not isinstance(data, list):
-    #         data = [data]
-    #
-    #     features = self.vectorizer.transform(data)
-    #     pred = self.model.predict_proba(features)
-    #     labels = [i for i in range(0, len(shape))]
-    #
-    #     return self.encoder.inverse_transform(pred)
-    #
+    def predict_proba(self, data):
+        if not isinstance(data, list):
+            data = [data]
+
+        data = [clean_resume(x) for x in data]
+        features = self.vectorizer.transform(data)
+        return self.model.predict_proba(features)
 
 
 if __name__ == "__main__":
     # train_save_knn()
-
     df = pd.read_csv("UpdatedResumeDataSet.csv", encoding="utf-8")
     df = prepare_data(df)
     sample = df["Clean"][0]
     knn = ResumeKNN()
-    knn.predict([sample])
+    print(knn.predict_proba(sample))
