@@ -2,7 +2,6 @@ import pandas as pd
 import os
 import re
 import string
-from pandas import DataFrame
 import pickle
 
 from sklearn.preprocessing import LabelEncoder
@@ -10,6 +9,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import metrics
+
+
+def clean_data(df):
+    df.drop_duplicates(subset=["Resume"], keep="first", inplace=True)
+    df.reset_index(inplace=True, drop=True)
+    return df
 
 
 # support from https://www.kaggle.com/code/gauravduttakiit/resume-screening-using-machine-learning
@@ -30,22 +35,10 @@ def clean_resume(text: str):
     return text
 
 
-def clean_data(df: DataFrame):
-    df.drop_duplicates(subset="Resume", keep="first", inplace=True)
-    df.reset_index(inplace=True, drop=True)
-    return df
-
-
-# call this
-def prepare_data(df: DataFrame) -> DataFrame:
-    df = clean_data(df)
-    df["Clean"] = df["Resume"].apply(clean_resume)
-    return df
-
-
 def train_save_knn():
     df = pd.read_csv("UpdatedResumeDataSet.csv", encoding="utf-8")
-    df = prepare_data(df)
+    df = clean_data(df)
+    df["Clean"] = df["Resume"].apply(clean_resume)
 
     le = LabelEncoder()
     df["Category"] = le.fit_transform(df["Category"])
@@ -130,10 +123,16 @@ class ResumeKNN:
         return self.model.predict_proba(features)
 
 
-if __name__ == "__main__":
-    # train_save_knn()
+def test():
     df = pd.read_csv("UpdatedResumeDataSet.csv", encoding="utf-8")
-    df = prepare_data(df)
-    sample = df["Clean"][0]
+    df = clean_data(df)
+    df["Clean"] = df["Resume"].apply(clean_resume)
+    sample = df["Clean"].sample(30).to_list()
     knn = ResumeKNN()
-    print(knn.predict_proba(sample))
+    # print(knn.get_categories())
+    print(knn.predict(sample))
+
+
+if __name__ == "__main__":
+    test()
+    # train_save_knn()

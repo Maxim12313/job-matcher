@@ -3,6 +3,7 @@ import pymupdf
 
 
 SECTION_TITLES = [
+    "employment",
     "education",
     "experience",
     "projects",
