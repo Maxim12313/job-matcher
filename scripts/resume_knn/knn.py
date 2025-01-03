@@ -82,7 +82,6 @@ def train_save_knn():
         pickle.dump(vectorizer, file)
 
 
-# TODO: also remove name, email, location, phone number from resume
 class ResumeKNN:
     model: KNeighborsClassifier = None
     encoder: LabelEncoder = None
@@ -123,16 +122,34 @@ class ResumeKNN:
         return self.model.predict_proba(features)
 
 
+def get_job_weights(job):
+    df = pd.read_csv("UpdatedResumeDataSet.csv", encoding="utf-8")
+    df = clean_data(df)
+    df["Clean"] = df["Resume"].apply(clean_resume)
+    df = df[df["Category"] == "HR"]
+    sample = df["Clean"].to_list()
+    knn = ResumeKNN()
+    weights = knn.vectorizer.transform(sample).todense()
+    tokens = knn.vectorizer.get_feature_names_out()
+    for j in range(len(sample)):
+        res = [(weights[j, i].item(), tokens[i]) for i in range(len(tokens))]
+        res = sorted(res, key=lambda x: x[0], reverse=True)
+        for a, b in res[:30]:
+            print(a, b)
+        print()
+
+
 def test():
     df = pd.read_csv("UpdatedResumeDataSet.csv", encoding="utf-8")
     df = clean_data(df)
     df["Clean"] = df["Resume"].apply(clean_resume)
     sample = df["Clean"].sample(30).to_list()
     knn = ResumeKNN()
-    # print(knn.get_categories())
+    print(knn.get_categories())
     print(knn.predict(sample))
 
 
 if __name__ == "__main__":
+    # get_job_weights("Java Developer")
     test()
     # train_save_knn()
