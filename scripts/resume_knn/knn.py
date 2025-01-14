@@ -1,8 +1,8 @@
 import pandas as pd
 import os
+import pickle
 import re
 import string
-import pickle
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -18,6 +18,8 @@ def clean_data(df):
 
 
 # support from https://www.kaggle.com/code/gauravduttakiit/resume-screening-using-machine-learning
+
+
 def clean_resume(text: str):
     # clean links
     text = re.sub(r"http\S+", " ", text)
@@ -126,7 +128,7 @@ def get_job_weights(job):
     df = pd.read_csv("UpdatedResumeDataSet.csv", encoding="utf-8")
     df = clean_data(df)
     df["Clean"] = df["Resume"].apply(clean_resume)
-    df = df[df["Category"] == "HR"]
+    df = df[df["Category"] == job]
     sample = df["Clean"].to_list()
     knn = ResumeKNN()
     weights = knn.vectorizer.transform(sample).todense()
@@ -144,12 +146,13 @@ def test():
     df = clean_data(df)
     df["Clean"] = df["Resume"].apply(clean_resume)
     sample = df["Clean"].sample(30).to_list()
-    knn = ResumeKNN()
-    print(knn.get_categories())
-    print(knn.predict(sample))
+    print(sample[0])
+    # knn = ResumeKNN()
+    # print(knn.get_categories())
+    # print(knn.predict(sample))
 
 
 if __name__ == "__main__":
-    # get_job_weights("Java Developer")
+    # get_job_weights("Data Science")
     test()
     # train_save_knn()

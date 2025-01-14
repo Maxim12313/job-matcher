@@ -22,7 +22,7 @@ def knn_results(data):
     for key in data:
         if key in excluded:
             continue
-        text += key + "".join(x for x in data[key])
+        text += "".join(x for x in data[key])
 
     pred = knn.predict(text)[0]
     st.write(f"Your skill is best suited to {pred}")
