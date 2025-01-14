@@ -1,8 +1,8 @@
 import pandas as pd
 import os
+import pickle
 import re
 import string
-import pickle
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -18,6 +18,8 @@ def clean_data(df):
 
 
 # support from https://www.kaggle.com/code/gauravduttakiit/resume-screening-using-machine-learning
+
+
 def clean_resume(text: str):
     # clean links
     text = re.sub(r"http\S+", " ", text)
@@ -82,7 +84,6 @@ def train_save_knn():
         pickle.dump(vectorizer, file)
 
 
-# TODO: also remove name, email, location, phone number from resume
 class ResumeKNN:
     model: KNeighborsClassifier = None
     encoder: LabelEncoder = None
@@ -123,16 +124,35 @@ class ResumeKNN:
         return self.model.predict_proba(features)
 
 
+def get_job_weights(job):
+    df = pd.read_csv("UpdatedResumeDataSet.csv", encoding="utf-8")
+    df = clean_data(df)
+    df["Clean"] = df["Resume"].apply(clean_resume)
+    df = df[df["Category"] == job]
+    sample = df["Clean"].to_list()
+    knn = ResumeKNN()
+    weights = knn.vectorizer.transform(sample).todense()
+    tokens = knn.vectorizer.get_feature_names_out()
+    for j in range(len(sample)):
+        res = [(weights[j, i].item(), tokens[i]) for i in range(len(tokens))]
+        res = sorted(res, key=lambda x: x[0], reverse=True)
+        for a, b in res[:30]:
+            print(a, b)
+        print()
+
+
 def test():
     df = pd.read_csv("UpdatedResumeDataSet.csv", encoding="utf-8")
     df = clean_data(df)
     df["Clean"] = df["Resume"].apply(clean_resume)
     sample = df["Clean"].sample(30).to_list()
-    knn = ResumeKNN()
+    print(sample[0])
+    # knn = ResumeKNN()
     # print(knn.get_categories())
-    print(knn.predict(sample))
+    # print(knn.predict(sample))
 
 
 if __name__ == "__main__":
+    # get_job_weights("Data Science")
     test()
     # train_save_knn()
